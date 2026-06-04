@@ -60,18 +60,15 @@ app.post("/send-otp", async (req, res) => {
 
   const otp = Math.floor(1000 + Math.random() * 9000);
 
-  const a = await redisClient.set(`otp:${phone}`, otp, {
-    EX: 300,
+  await redisClient.set(`otp:${phone}`, otp, {
+    EX: 120,
   });
-  console.log("a is here ===>>", a);
-
   res.json({
     otp,
   });
 });
 
 // create User
-
 app.post("/create-user", async (req, res) => {
   const { name, email, password, phone } = req.body;
 
@@ -94,6 +91,46 @@ app.post("/create-user", async (req, res) => {
   });
 });
 
+app.post("/verify-otp", async (req, res) => {
+  const { phone, otp } = req.body;
+
+  const storedOtp = await redisClient.get(`otp:${phone}`);
+
+  if (!storedOtp) {
+    return res.status(400).json({
+      message: "OTP Expired",
+    });
+  }
+
+  if (storedOtp !== otp.toString()) {
+    return res.status(400).json({
+      message: "Invalid OTP",
+    });
+  }
+
+  await redisClient.del(`otp:${phone}`);
+  let newUser = await User.findOneAndUpdate(
+    { phone },
+    {
+      $set: {
+        isVerified: true,
+      },
+    },
+    {
+      new: true,
+    },
+  );
+
+  await redisClient.set(`user:${newUser._id}`, JSON.stringify(newUser), {
+    EX: 60,
+  });
+  console.log("newUser is here ");
+
+  res.json({
+    message: "OTP Verified",
+  });
+});
+
 app.listen(process.env.PORT, () => {
-  console.log("Server Running");
+  console.log(`Server is runnign on http://localhost:${process.env.PORT}`);
 });
