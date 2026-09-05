@@ -10,10 +10,6 @@ const app = express();
 app.use(express.json());
 app.use(logger);
 
-app.get("/", async (req, res) => {
-  res.json("Server is Running.......!");
-});
-
 app.use("/api/v1", userRoute);
 
 async function startServer() {

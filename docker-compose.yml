@@ -10,6 +10,10 @@ services:
     depends_on:
       - mongodb
       - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
 
   mongodb:
     image: mongo:latest
