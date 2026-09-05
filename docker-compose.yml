@@ -1,0 +1,40 @@
+services:
+  api_app:
+    build: .
+    container_name: node_backend
+    restart: unless-stopped
+    ports:
+      - "7000:7000" # Yahan 7000 kar diya hai
+    env_file:
+      - .env # Ab ye directly aap ki .env file se variables uthayega!
+    depends_on:
+      - mongodb
+      - redis
+
+  mongodb:
+    image: mongo:latest
+    container_name: local_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: mydatabase # Yahan app_db ki jagah mydatabase kar diya
+    volumes:
+      - mongodb_data:/data/db
+
+  redis:
+    image: redis:alpine
+    container_name: local_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local

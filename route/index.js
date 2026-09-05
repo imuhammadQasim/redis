@@ -1,29 +1,15 @@
-app.get("/users/:id", async (req, res) => {
-  const { id } = req.params;
+const express = require("express");
+const {
+  createUser,
+  verifyOtp,
+  sendOtp,
+  getUser,
+} = require("../controller/index");
+const router = express.Router();
 
-  const cacheKey = `user:${id}`;
+router.post("/create", createUser);
+router.post("/verify-otp", verifyOtp);
+router.post("/send-otp", sendOtp);
+router.get("/users/:id", getUser);
 
-  const cachedUser = await redisClient.get(cacheKey);
-
-  if (cachedUser) {
-    console.log("CACHE HIT");
-
-    return res.json({
-      source: "redis",
-      data: JSON.parse(cachedUser),
-    });
-  }
-
-  console.log("CACHE MISS");
-
-  const user = await User.findById(id);
-
-  await redisClient.set(cacheKey, JSON.stringify(user), {
-    EX: 60,
-  });
-
-  return res.json({
-    source: "mongodb",
-    data: user,
-  });
-});
+module.exports = router;

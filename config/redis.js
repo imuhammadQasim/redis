@@ -1,7 +1,8 @@
 const { createClient } = require("redis");
+const config = require("./config");
 
 const redisClient = createClient({
-  url: process.env.REDIS_URL,
+  url: config.redis_url,
 });
 
 redisClient.on("error", (err) => {
