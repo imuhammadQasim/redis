@@ -1,13 +1,12 @@
 const USER = require("../model/user");
 const { redisClient } = require("../config/redis");
 const config = require("../config/config");
+const { enqueueEmail } = require("../queue/email.queue");
 const {
   JWT_Signature,
   JWT_Verify,
   JWT_Decode,
   generateOTP,
-  verifyOTP,
-  emailTransporter,
 } = require("../utils/helpers");
 
 const createUser = async (req, res) => {
@@ -37,8 +36,8 @@ const createUser = async (req, res) => {
     text: `Your OTP code is ${otp}. It will expire in 2 minutes.`,
   };
 
-  await emailTransporter.sendMail(mailOptions);
-  console.log("Email sent to", email, "Successfully.");
+  await enqueueEmail(mailOptions);
+  console.log("Email queued for", email);
   const newUser = new USER({
     name,
     email,
@@ -72,7 +71,7 @@ const resendOtp = async (req, res) => {
     subject: "Your OTP Code",
     text: `Your OTP code is ${otp}. It will expire in 2 minutes.`,
   };
-  await emailTransporter.sendMail(mailOptions);
+  await enqueueEmail(mailOptions);
   console.log(`OTP for ${email} is ${otp}`);
 
   res.json({

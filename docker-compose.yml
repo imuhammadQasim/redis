@@ -15,6 +15,19 @@ services:
       - /app/node_modules
     command: npm run dev
 
+  email_worker:
+    build: .
+    container_name: email_worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run worker
+
   mongodb:
     image: mongo:latest
     container_name: local_mongodb

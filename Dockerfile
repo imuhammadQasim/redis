@@ -1,6 +1,6 @@
-# 1. Node.js ka lightweight image use karein
+# 1. Node.js
 FROM node:22-alpine
-# 2. Container ke andar app ka folder banayein
+# 2. Create a folder inside the container
 WORKDIR /app
 
 # 3. Sirf package.json aur package-lock.json pehle copy karein
